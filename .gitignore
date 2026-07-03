@@ -1,0 +1,7 @@
+node_modules/
+reports/
+fixtures/auth-state.json
+fixtures/admin-auth-state.json
+.env.test
+tests/visual/**/*.png-snapshots/
+playwright/.cache/
