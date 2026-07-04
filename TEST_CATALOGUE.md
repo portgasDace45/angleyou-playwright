@@ -249,15 +249,19 @@ Chromium only. Baselines stored in `tests/visual/01-visual-regression.spec.js-sn
 
 ### `tests/api/02-checkout-api.spec.js` — Checkout & webhook endpoints
 
+All tests that assert 401 or 400 are skipped automatically when `STRIPE_TEST_CARD` is absent, because the route returns 503 before reaching auth/param checks when Stripe is unconfigured.
+
 | Tag | Test |
 |---|---|
-| @smoke | POST /api/checkout/ai-readiness — returns 401 unauthenticated |
+| @smoke | POST /api/checkout/ai-readiness — returns 401 unauthenticated *(skips if Stripe not configured)* |
+| @regression | POST /api/checkout/ai-readiness — returns 503 when Stripe not configured *(skips if Stripe is configured)* |
 | @regression | POST /api/checkout/it-maturity-scores — returns 401 unauthenticated |
 | @regression | POST /api/checkout/it-maturity-full — returns 401 unauthenticated |
-| @regression | POST /api/webhooks/stripe — rejects request with no signature |
-| @regression | POST /api/webhooks/stripe — rejects invalid Stripe signature |
-| @regression | GET /api/checkout/verify — returns 400 for missing params |
-| @regression | GET /api/checkout/verify — returns 401 unauthenticated with params |
+| @regression | POST /api/webhooks/stripe — rejects request with no signature (asserts body has `error`) |
+| @regression | POST /api/webhooks/stripe — rejects invalid Stripe signature (asserts body has `error`) |
+| fixme | POST /api/webhooks/stripe — returns 200 for unrecognised event type *(requires valid signed payload — covered by e2e checkout flow)* |
+| @regression | GET /api/checkout/verify — returns 400 for missing params (asserts `{ error: 'Missing parameters' }`) |
+| @regression | GET /api/checkout/verify — returns 401 unauthenticated with params (asserts body has `error`) |
 
 ---
 
