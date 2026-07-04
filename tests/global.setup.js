@@ -1,5 +1,6 @@
 import { test as setup, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
+import ws from 'ws';  // ADD THIS LINE
 import path from 'path';
 import { GatePage } from '../pages/GatePage.js';
 import { OnboardingPage } from '../pages/OnboardingPage.js';
@@ -13,11 +14,14 @@ setup('authenticate and bypass gate', async ({ page, context, request }) => {
   await page.waitForURL('/', { timeout: 10_000 });
 
   // ── Step 2: Create / retrieve test user via Supabase Admin ────────────
-  const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY,
+  { 
+    auth: { autoRefreshToken: false, persistSession: false },
+    realtime: { transport: ws }
+  }
+);
 
   const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
   let testUser = userList?.users?.find(
