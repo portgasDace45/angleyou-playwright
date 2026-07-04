@@ -52,6 +52,7 @@ jobs:
           STRIPE_TEST_CARD: 4242424242424242
           STRIPE_TEST_EXPIRY: 12/26
           STRIPE_TEST_CVC: 123
+          PLAYWRIGHT_HTML_OUTPUT_DIR: reports/html
         run: npx playwright test --grep @smoke --project=chromium --reporter=github,html
 
       - name: Upload report
@@ -93,6 +94,7 @@ jobs:
           STRIPE_TEST_CARD: 4242424242424242
           STRIPE_TEST_EXPIRY: 12/26
           STRIPE_TEST_CVC: 123
+          PLAYWRIGHT_HTML_OUTPUT_DIR: reports/html
         run: npx playwright test --grep @regression --reporter=github,html
 
       - name: Upload report
