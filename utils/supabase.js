@@ -117,6 +117,24 @@ export async function cleanupTestAssessments(userId) {
 }
 
 /**
+ * Deletes a single AI Readiness assessment by ID.
+ * Prefer this over cleanupTestAssessments in parallel-safe tests.
+ */
+export async function deleteAIAssessmentById(id) {
+  const supabase = getAdminClient();
+  await supabase.from('ai_assessments').delete().eq('id', id);
+}
+
+/**
+ * Deletes a single IT Maturity assessment by ID.
+ * Prefer this over cleanupTestAssessments in parallel-safe tests.
+ */
+export async function deleteITMAssessmentById(id) {
+  const supabase = getAdminClient();
+  await supabase.from('it_maturity_assessments').delete().eq('id', id);
+}
+
+/**
  * Hard-sets the IT Maturity tier for an assessment (simulates a successful Stripe webhook).
  */
 export async function setITMaturityTier(assessmentId, tier) {

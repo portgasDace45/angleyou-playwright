@@ -6,8 +6,10 @@ import { expect } from '@playwright/test';
 const SECTION_TITLES =
   /^(Software & Licensing|Data & Storage|AI Readiness|Security & Access|Strategy & Governance)$/;
 
-// Buttons on the assess page that are NOT answer options
-const NON_OPTION_BUTTONS = /previous|next section|submit|saving results|mark as n\/a|remove n\/a/i;
+// Anchored to exact nav/control button labels so option labels containing
+// common words (e.g. "Submit your tools") are not accidentally filtered out.
+const NON_OPTION_BUTTONS =
+  /^(← Previous|Next section →|Submit & view results →|Saving results\.\.\.|Mark as N\/A|✕ Remove N\/A)$/;
 
 export class AIReadinessPage {
   constructor(page) {
@@ -21,7 +23,9 @@ export class AIReadinessPage {
     this.sectionTabs = page.getByText(/^\S+ (Software & Licensing|Data & Storage|AI Readiness|Security & Access|Strategy & Governance)$/);
     this.sectionHeading = page.getByRole('heading', { level: 1 });
     // Answer options are plain buttons — everything except the nav/submit buttons
-    this.optionButtons = page.getByRole('button').filter({ hasNotText: NON_OPTION_BUTTONS });
+    this.optionButtons = page
+      .locator('xpath=//button[not(ancestor::nav)]')
+      .filter({ hasNotText: NON_OPTION_BUTTONS });
     this.prevButton = page.getByRole('button', { name: '← Previous' });
     this.nextButton = page.getByRole('button', { name: /next section/i });
     this.submitButton = page.getByRole('button', { name: /submit & view results/i });
@@ -55,11 +59,11 @@ export class AIReadinessPage {
    * LAST option ('max'), and clicking in reverse order selects its FIRST.
    */
   async answerCurrentSection(strategy = 'first') {
-    const count = await this.optionButtons.count();
-    if (strategy === 'max') {
-      for (let i = 0; i < count; i++) await this.optionButtons.nth(i).click();
-    } else {
-      for (let i = count - 1; i >= 0; i--) await this.optionButtons.nth(i).click();
+    await this.optionButtons.first().waitFor({ state: 'visible' });
+    const buttons = await this.optionButtons.all();
+    const ordered = strategy === 'max' ? buttons : [...buttons].reverse();
+    for (const btn of ordered) {
+      await btn.click();
     }
   }
 

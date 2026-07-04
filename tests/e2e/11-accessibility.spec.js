@@ -6,8 +6,8 @@ import { test, expect } from '@playwright/test';
 import { ITMaturityPage } from '../../pages/ITMaturityPage.js';
 import {
   getOrCreateTestUser,
-  cleanupTestAssessments,
   seedITMaturityAssessment,
+  deleteITMAssessmentById,
 } from '../../utils/supabase.js';
 
 test.describe('Accessibility — keyboard navigation', () => {
@@ -31,8 +31,6 @@ test.describe('Accessibility — keyboard navigation', () => {
   });
 
   test('assessment answer options are keyboard selectable @regression', async ({ page }) => {
-    // Answer options are buttons, not radio inputs — the assess page also
-    // needs a seeded assessment row plus its id in the URL to render
     const userId = await getOrCreateTestUser();
     const assessmentId = await seedITMaturityAssessment(userId, 'free_teaser', {
       status: 'started',
@@ -46,10 +44,10 @@ test.describe('Accessibility — keyboard navigation', () => {
       const firstOption = itm.optionButtons.first();
       await firstOption.focus();
       await page.keyboard.press('Enter');
-      // Selecting an answer advances the "N / M answered" progress counter
+      // Selecting an answer advances the "N / M answered" counter
       await expect(page.getByText(/1 \/ \d+ answered/)).toBeVisible();
     } finally {
-      await cleanupTestAssessments(userId);
+      await deleteITMAssessmentById(assessmentId);
     }
   });
 });
