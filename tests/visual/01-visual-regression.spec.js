@@ -18,8 +18,12 @@ test.skip(({ browserName }) => browserName !== 'chromium', 'Visual tests: Chromi
 //                         assessments; parallel tests can create a completed row mid-run
 const visualPages = [
   { name: 'landing', path: '/', ready: (p) => p.getByText('your IT stands.') },
-  // AI Readiness product always shows the "Purchase" button regardless of history
-  { name: 'ai-readiness-product', path: '/dashboard/products/ai-readiness', ready: (p) => p.getByRole('button', { name: /^purchase/i }) },
+  // AI Readiness product shows the Purchase button when no incomplete assessment exists.
+  // After 2026-07-05 the page also shows an amber resume banner if the user has a
+  // paid-but-unfinished row — that would change the snapshot. The DB was reset on
+  // 2026-07-05 so this is currently stable. Re-run --update-snapshots if the banner
+  // appears and causes a diff.
+  { name: 'ai-readiness-product', path: '/dashboard/products/ai-readiness', ready: (p) => p.getByRole('button', { name: /^purchase/i }).or(p.getByText('unfinished assessment')) },
   // /terms and /privacy bypass the gate and don't require auth
   { name: 'terms', path: '/terms', ready: (p) => p.getByRole('heading', { level: 1 }) },
   { name: 'privacy', path: '/privacy', ready: (p) => p.getByRole('heading', { level: 1 }) },

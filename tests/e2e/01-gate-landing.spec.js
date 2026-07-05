@@ -46,7 +46,10 @@ test.describe('Landing Page', () => {
     await expect(landing.headline).toBeVisible();
   });
 
-  test('8-domain expandable counter reveals all domains @regression', async ({ page }) => {
+  test.fixme('8-domain expandable counter reveals all domains @regression', async ({ page }) => {
+    // The expandable "IT domains covered" card was removed in the 2026-07-05 landing page
+    // redesign. Update LandingPage.domainsCard locator and this test once the new UI
+    // element for domain listing is confirmed.
     const landing = new LandingPage(page);
     await landing.goto();
     await landing.expandDomains();

@@ -53,6 +53,30 @@ export class ITMaturityPage {
   async gotoAssessPage(assessmentId) {
     const query = assessmentId ? `?assessment_id=${assessmentId}` : '';
     await this.page.goto(`/dashboard/products/it-maturity/assess${query}`);
+    await this.skipEnvironmentStep();
+  }
+
+  /**
+   * Both assess pages now show an Environment step (optional env fields) before
+   * the questions. Click "Continue to assessment →" to get past it.
+   *
+   * We wait for the progress counter ("0 / N answered") as the ready signal —
+   * it only appears once questions are fully mounted. Waiting for optionButtons
+   * is unreliable because the env step's "Saving..." button also matches that
+   * locator and causes premature resolution before questions load.
+   *
+   * Safe to call even when the env step is absent (error state).
+   */
+  async skipEnvironmentStep() {
+    const continueBtn = this.page.getByRole('button', { name: /continue to assessment/i });
+    try {
+      await continueBtn.waitFor({ state: 'visible', timeout: 8_000 });
+      await continueBtn.click();
+      // Progress counter only renders once questions are mounted — not on the env step
+      await this.page.getByText(/\d+ \/ \d+ answered/).waitFor({ state: 'visible', timeout: 15_000 });
+    } catch {
+      // Env step not present (error page, or already past it) — proceed
+    }
   }
 
   async startFreeAssessment() {

@@ -34,8 +34,9 @@ export class OnboardingPage {
 
   /**
    * Flow helper: fills every required onboarding field and submits.
-   * Full name, position, and industry are required by the form, so
-   * they get sensible defaults when not provided.
+   * Single Company: fills size, industry, and optional business type fields.
+   * MSP / Consultant: only fills org name and optional domain — size, industry,
+   * and framework are hidden for MSP accounts and not submitted.
    */
   async complete({
     orgName,
@@ -50,15 +51,23 @@ export class OnboardingPage {
     await this.positionInput.fill(position);
     await this.selectAccountType(accountType);
     await this.orgNameInput.fill(orgName);
-    await this.orgSizeSelect.selectOption(orgSize);
-    if (industry) {
-      await this.industrySelect.selectOption(industry);
-    } else {
-      // First real option after the "Select industry..." placeholder
-      await this.industrySelect.selectOption({ index: 1 });
+
+    if (accountType !== 'msp') {
+      // Single Company: size and industry are required and shown
+      await this.orgSizeSelect.selectOption(orgSize);
+      if (industry) {
+        await this.industrySelect.selectOption(industry);
+      } else {
+        // First real option after the "Select industry..." placeholder
+        await this.industrySelect.selectOption({ index: 1 });
+      }
     }
+
     if (domain) await this.domainInput.fill(domain);
     await this.continueButton.click();
-    await this.page.waitForURL('/dashboard', { timeout: 10_000 });
+
+    // MSP redirects to /dashboard/msp/clients; single redirects to /dashboard
+    const expectedUrl = accountType === 'msp' ? '/dashboard/msp/clients' : '/dashboard';
+    await this.page.waitForURL(expectedUrl, { timeout: 10_000 });
   }
 }

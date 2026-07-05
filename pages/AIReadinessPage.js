@@ -4,7 +4,7 @@
 import { expect } from '@playwright/test';
 
 const SECTION_TITLES =
-  /^(Software & Licensing|Data & Storage|AI Readiness|Security & Access|Strategy & Governance)$/;
+  /^(Technology Foundation|Data & Storage|AI Readiness|Security & Access|Strategy & Governance)$/;
 
 // Anchored to exact nav/control button labels so option labels containing
 // common words (e.g. "Submit your tools") are not accidentally filtered out.
@@ -48,8 +48,32 @@ export class AIReadinessPage {
     await this.page.goto('/dashboard/products/ai-readiness');
   }
 
-  async gotoAssessPage() {
-    await this.page.goto('/dashboard/products/ai-readiness/assess');
+  async gotoAssessPage(assessmentId) {
+    const query = assessmentId ? `?assessment_id=${assessmentId}` : '';
+    await this.page.goto(`/dashboard/products/ai-readiness/assess${query}`);
+    await this.skipEnvironmentStep();
+  }
+
+  /**
+   * The AI Readiness assess page now shows an Environment step before questions.
+   * Click "Continue to assessment →" to get past it.
+   *
+   * Waits for the progress counter ("0 / N answered") as the ready signal —
+   * it only appears once questions are mounted, not during the env step or
+   * the transient "Saving..." state.
+   *
+   * Safe to call even when the env step is absent (error state, no assessmentId).
+   */
+  async skipEnvironmentStep() {
+    const continueBtn = this.page.getByRole('button', { name: /continue to assessment/i });
+    try {
+      await continueBtn.waitFor({ state: 'visible', timeout: 8_000 });
+      await continueBtn.click();
+      // Progress counter only renders once questions are loaded — not on the env step
+      await this.page.getByText(/\d+ \/ \d+ answered/).waitFor({ state: 'visible', timeout: 15_000 });
+    } catch {
+      // Env step not present (error page or already past it) — proceed
+    }
   }
 
   /**

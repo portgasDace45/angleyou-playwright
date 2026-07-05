@@ -10,7 +10,9 @@ import { GatePage } from '../../pages/GatePage.js';
 import { getOrCreateTestUser } from '../../utils/supabase.js';
 
 test.describe('Onboarding — form rendering (shared user)', () => {
-  test('onboarding page renders all fields @smoke', async ({ page }) => {
+  test('onboarding page renders required fields for Single Company (default) @smoke', async ({ page }) => {
+    // Single Company is the default account type — size, industry, and domain are all shown.
+    // MSP mode hides size and industry; tested separately in the submission tests.
     const onboarding = new OnboardingPage(page);
     await onboarding.goto();
     await expect(onboarding.orgNameInput).toBeVisible();
@@ -54,16 +56,17 @@ test.describe('Onboarding — submission (dedicated users)', () => {
     await expect(page).toHaveURL('/dashboard');
   });
 
-  test('MSP account type completes and redirects to dashboard @regression', async ({ page }) => {
+  test('MSP account type completes and redirects to client management @regression', async ({ page }) => {
     await loginAsDedicatedUser(page, 'onboard-msp');
     const onboarding = new OnboardingPage(page);
     await onboarding.goto();
     await onboarding.complete({
       orgName: 'MSP Test Org',
-      orgSize: '51-200',
       accountType: 'msp',
+      // orgSize/industry intentionally omitted — hidden for MSP accounts
     });
-    await expect(page).toHaveURL('/dashboard');
+    // MSP redirects to /dashboard/msp/clients, not /dashboard
+    await expect(page).toHaveURL('/dashboard/msp/clients');
   });
 
   test('optional domain field is accepted @regression', async ({ page }) => {
