@@ -44,7 +44,7 @@ test('IT Maturity product detail page loads with start button @smoke', async ({ 
 
 // ── Assessment flow ───────────────────────────────────────────────────────────
 
-test('completing the free assessment reaches results @regression', async ({ page }) => {
+test('completing the free assessment reaches results @regression', { timeout: 90_000 }, async ({ page }) => {
   const assessmentId = await seedStarted();
   try {
     const itm = new ITMaturityPage(page);

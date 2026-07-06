@@ -137,6 +137,8 @@ export class ITMaturityPage {
   }
 
   async waitForResults() {
-    await this.page.waitForURL(/\/results\/[a-z0-9-]+/, { timeout: 20_000 });
+    // Allow up to 60s — Anthropic commentary generation + Vercel cold start can
+    // easily consume 20-30s, and slowMo stretches action time further.
+    await this.page.waitForURL(/\/results\/[a-z0-9-]+/, { timeout: 60_000 });
   }
 }

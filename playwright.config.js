@@ -52,7 +52,7 @@ export default defineConfig({
     // otherwise their unauthenticated-401 assertions would run WITH cookies.
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], launchOptions: { slowMo: 500 } },
+      use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
       testIgnore: /tests[\\/]api[\\/].*/,
     },
