@@ -16,8 +16,8 @@ test('landing page visual snapshot @regression', async ({ page }) => {
   // Primary CTA buttons
   await expect(page.getByRole('link', { name: /get started|start free|assess/i }).first()).toBeVisible();
   // Footer links
-  await expect(page.getByRole('link', { name: /terms/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: /privacy/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /terms/i }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /privacy/i }).first()).toBeVisible();
   // No JS error overlay
   await expect(page.locator('body')).not.toContainText("Application error");
 });
